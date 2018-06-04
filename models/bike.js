@@ -12,7 +12,7 @@ var bikeSchema = new mongoose.Schema({
   totalDistance: {type: Number, default: 0},
   batteryLife: {type: Number},
   rating: {type: Number},
-  campus: {type: mongoose.Schema.Types.ObjectId, ref: 'Campus'},
+  campus: {type: String}, //campus name
   currentPosition: [{type: Number}],
   inRide: {type: Boolean, default: false},
   outsideFence: {type: Boolean, default: false},

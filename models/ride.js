@@ -6,11 +6,13 @@ var rideSchema = new mongoose.Schema({
   startPosition: [{type: Number}],
   endPosition: [{type: Number}],
   route: [[{type: Number}]],
-  user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+  user: {type: String}, //email
+  bike: {type: Number}, //bike number
   outsideFence: {type: Boolean, default: false},
   time: {type: Number},
   distance: {type: Number},
-  rating: {type: Number}
+  rating: {type: Number},
+  inRide: {type: Boolean, default: true}
 });
 
 // Export schema =====================================================================================================================================================================

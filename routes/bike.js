@@ -26,22 +26,20 @@ module.exports = function(passport) {
 				while(bikeNumbers.indexOf(number)!=-1) {
 					number = Math.random().toString().slice(2, 8);
 				}
-				Campus.findOne({name: req.body.campus}, function(err, campus) {
-					let newBike = new Bike({
-						number: number,
-						name: req.body.name,
-						owner: req.body.owner,
-						color: req.body.color,
-						type: req.body.type,
-						lockID: req.body.lockID,
-						campus: campus._id
-					})
-					newBike.save().then(async function(bike) {
-						campus.bikeList.push(bike._id);
-						campus.save(function(err, savedCampus) {
-							if(err) throw err;
-							res.json({success: true});
-						})
+				let newBike = new Bike({
+					number: number,
+					name: req.body.name,
+					owner: req.body.owner,
+					color: req.body.color,
+					type: req.body.type,
+					lockID: req.body.lockID,
+					campus: req.body.campus
+				})
+				newBike.save().then(async function(bike) {
+					campus.bikeList.push(bike._id);
+					campus.save(function(err, savedCampus) {
+						if(err) throw err;
+						res.json({success: true});
 					})
 				})
 			})

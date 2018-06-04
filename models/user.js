@@ -9,9 +9,9 @@ var userSchema = new mongoose.Schema({
   lastName: {type: String},
   //birthday: {type: Date},
   paymentToken: {type: String},
-  campus: {type: mongoose.Schema.Types.ObjectId, ref: 'Campus'},
+  campus: {type: String}, //campus name
   pastRides: [{type: mongoose.Schema.Types.ObjectId, ref: 'Ride'}],
-  favoriteBikes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Bike'}],
+  favoriteBikes: [{type: Number}], //bike numbers
   resetPasswordToken: {type: String},
   resetPasswordExpires: {type: Date}
 });
