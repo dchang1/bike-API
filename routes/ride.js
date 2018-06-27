@@ -22,13 +22,20 @@ module.exports = function(passport) {
 		request({url: url, json: true}, function (error, response, body) {
 			if (!error && response.statusCode === 200) {
 				let newRide = new Ride({
-					//startPosition
-					//route
+					startPosition: req.body.position,
+					startTime: Date.now(),
 					user: req.user.email,
 					bike: req.body.bike
 				})
-				newBike.save().then(async function(bike) {
-					res.json({success: true})
+				newRide.save().then(async function(ride) {
+					Bike.findOne({number: ride.bike}, function(err, bike) {
+						bike.currentRide = ride._id;
+						bike.rides.push(ride._id);
+						bike.save(function(err, bike) {
+							if(err) throw err;
+							res.json({success: true})
+						})
+					})
 				}).catch(function(err) {
 					res.json({sucess: false, message: 'Bike did not unlock.'});
 				})
@@ -40,8 +47,25 @@ module.exports = function(passport) {
 		Ride.findById(req.params.id, function(err, ride) {
 			if(err) throw err;
 			ride.endTime = Date.now();
+			ride.endPosition = req.body.position;
+			//ride.distance = distance;
 			ride.time = ride.endTime - ride.startTime;
-
+			ride.rating = req.body.rating;
+			ride.inRide = false;
+			ride.route.push(req.body.position);
+			ride.save(function(err, savedRide) {
+				Bike.findOne({number: savedRide.bike}, function(err, bike) {
+					if(err) throw err;
+					bike.currentRide = "";
+					bike.rating.push(savedRide.rating);
+					//bike.totalHours += savedRide.time;
+					//bike.totalDistance += savedRide.distance;
+					bike.save(function(err, savedBike) {
+						if(err) throw err;
+						res.json({success: true});
+					})
+				})
+			})
 		})
 	})
 
