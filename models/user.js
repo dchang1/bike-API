@@ -7,7 +7,6 @@ var userSchema = new mongoose.Schema({
   password: {type: String, required: true},
   firstName: {type: String},
   lastName: {type: String},
-  //birthday: {type: Date},
   paymentToken: {type: String},
   campus: {type: String}, //campus name
   pastRides: [{type: mongoose.Schema.Types.ObjectId, ref: 'Ride'}],
