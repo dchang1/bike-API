@@ -10,7 +10,7 @@ var bikeSchema = new mongoose.Schema({
   rides: [{type: mongoose.Schema.Types.ObjectId, ref: 'Ride'}],
   totalHours: {type: Number, default: 0},
   totalDistance: {type: Number, default: 0},
-  rating: {type: Number},
+  rating: [{type: Number}],
   campus: {type: String}, //campus name
   currentPosition: [{type: Number}],
   currentRide: {type: mongoose.Schema.Types.ObjectId, ref: 'Ride'},
