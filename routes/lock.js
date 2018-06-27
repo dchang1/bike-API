@@ -18,7 +18,8 @@ module.exports = function(passport) {
 	})
   
   router.post('/updateLock', function(req, res) {
-    Lock.findOne({lockID: req.body.lock}, function(err, lock) {
+	  if(req.body.password==password) {
+	  	Lock.findOne({lockID: req.body.lock}, function(err, lock) {
       if(err) throw err;
       lock.currentPosition = req.body.data;
       lock.save().then(async function(savedLock) {
@@ -35,10 +36,45 @@ module.exports = function(passport) {
           })
         })
       })
-    })
+    })	  
+	  }
   })
  
 	router.post('/lock', function(req, res) {
+		Bike.findOne({bikeID: req.body.lock}, function(err, bike) {
+			if(err) throw err;
+			Ride.findById(bike.currentRide, function(err, ride) {
+				if(err) throw err;
+				if(ride) {
+					ride.endTime = Date.now();
+			ride.endPosition = req.body.position;
+			//ride.distance = distance;
+			ride.time = ride.endTime - ride.startTime;
+			ride.rating = req.body.rating;
+			ride.inRide = false;
+			ride.route.push(req.body.position);
+			ride.save(function(err, savedRide) {
+				Bike.findOne({number: savedRide.bike}, function(err, bike) {
+					if(err) throw err;
+					bike.currentRide = "";
+					bike.rating.push(savedRide.rating);
+					//bike.totalHours += savedRide.time;
+					//bike.totalDistance += savedRide.distance;
+					bike.save(function(err, savedBike) {
+						if(err) throw err;
+						res.json({success: true});
+					})
+				})
+			})
+				} else {
+					res.json({success: false});	
+				}
+			})
+		})
+	})
+		
+		
+	router.post('/newLock', function(req, res) {
 		if(req.body.password==password) {
 			Bike.find({}, function(err, bikes) {
 				let bikeNumbers = bikes.map(function(bike) {
