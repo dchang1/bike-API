@@ -62,7 +62,12 @@ module.exports = function(passport) {
 					//bike.totalDistance += savedRide.distance;
 					bike.save(function(err, savedBike) {
 						if(err) throw err;
-						res.json({success: true});
+						User.findOne({email: savedRide.user}, function(err, user) {
+							user.pastRides.push(savedRide._id);
+							user.save(function(err, savedUser) {
+								res.json({success: true});
+							})
+						})
 					})
 				})
 			})
