@@ -12,7 +12,14 @@ module.exports = function(passport) {
 	router.get('/bike/:id', passport.authenticate('jwt', {session: false}), function(req, res) {
 		Bike.findOne({number: req.params.id}, function(err, bike) {
 			if(err) throw err;
-			res.json({"bike": bike})
+			res.json({"bike": bike});
+		})
+	})
+	
+	router.get('/allBikes', passport.authenticate('jwt', {session: false}), function(req, res) {
+		Bike.find({}, function(err, bikes) {
+			if(err) throw err;
+			res.json({"bikes": bikes});
 		})
 	})
 
