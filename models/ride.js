@@ -11,6 +11,7 @@ var rideSchema = new mongoose.Schema({
   outsideFence: {type: Boolean, default: false},
   time: {type: Number},
   distance: {type: Number},
+  campus: {type: String},
   rating: {type: Number},
   inRide: {type: Boolean, default: true}
 });

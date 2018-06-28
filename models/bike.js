@@ -7,6 +7,7 @@ var bikeSchema = new mongoose.Schema({
   name: {type: String},
   color: {type: String},
   type: {type: String},
+  batteryLife: {type: Number},
   rides: [{type: mongoose.Schema.Types.ObjectId, ref: 'Ride'}],
   totalHours: {type: Number, default: 0},
   totalDistance: {type: Number, default: 0},
@@ -15,7 +16,8 @@ var bikeSchema = new mongoose.Schema({
   currentPosition: [{type: Number}],
   currentRide: {type: mongoose.Schema.Types.ObjectId, ref: 'Ride'},
   outsideFence: {type: Boolean, default: false},
-  lockID: {type: Number}
+  lockID: {type: Number},
+  online: {type: Boolean, default: false}
 });
 
 // Export schema =====================================================================================================================================================================

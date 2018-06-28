@@ -16,30 +16,33 @@ module.exports = function(passport) {
 			res.json({"lock": lock})
 		})
 	})
-  
-  router.post('/updateLock', function(req, res) {
+
+  router.post('/gpsEvent', function(req, res) {
 	  if(req.body.password==password) {
-	  	Lock.findOne({lockID: req.body.lock}, function(err, lock) {
+	  	Lock.findOne({lockID: req.body.coreid}, function(err, lock) {
       if(err) throw err;
-      lock.currentPosition = req.body.data;
+      lock.currentPosition = req.body.data.split(',');
       lock.save().then(async function(savedLock) {
         Bike.findOne({number: savedLock.bike}, function(err, bike) {
           if(err) throw err;
-          bike.currentPosition = req.body.data;
+          bike.currentPosition = req.body.data.split(',');
           //if(bike outside fence)
           Ride.findById(bike.currentRide, function(err, ride) {
             if(err) throw err;
             if(ride) {
-              ride.route.push(req.body.data);
-              ride.save();
+              ride.route.push(req.body.data.split(','));
+              ride.save(function(err, savedRide) {
+								if(err) throw err;
+								res.json({success: true});
+							});
             }
           })
         })
       })
-    })	  
+    })
 	  }
   })
- 
+
 	router.post('/lock', function(req, res) {
 		Bike.findOne({bikeID: req.body.lock}, function(err, bike) {
 			if(err) throw err;
@@ -72,39 +75,22 @@ module.exports = function(passport) {
 				})
 			})
 				} else {
-					res.json({success: false});	
+					res.json({success: false});
 				}
 			})
 		})
 	})
-		
-		
+
+
 	router.post('/newLock', function(req, res) {
 		if(req.body.password==password) {
-			Bike.find({}, function(err, bikes) {
-				let bikeNumbers = bikes.map(function(bike) {
-					return bike.number;
-				})
-				let number = Math.random().toString().slice(2, 8);
-				while(bikeNumbers.indexOf(number)!=-1) {
-					number = Math.random().toString().slice(2, 8);
-				}
-				let newBike = new Bike({
-					number: number,
-					name: req.body.name,
-					owner: req.body.owner,
-					color: req.body.color,
-					type: req.body.type,
-					lockID: req.body.lockID,
-					campus: req.body.campus
-				})
-				newBike.save().then(async function(bike) {
-					campus.bikeList.push(bike._id);
-					campus.save(function(err, savedCampus) {
-						if(err) throw err;
-						res.json({success: true});
-					})
-				})
+			let newLock = new Lock({
+				lockID: req.body.id,
+				bike: req.body.bike
+			})
+			newLock.save(function(err, savedLock) {
+				if(err) throw err;
+				res.json({success: true});
 			})
 		} else {
 			res.json({success: false, message: 'You do not have permission.'})

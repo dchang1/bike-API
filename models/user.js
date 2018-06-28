@@ -12,7 +12,9 @@ var userSchema = new mongoose.Schema({
   pastRides: [{type: mongoose.Schema.Types.ObjectId, ref: 'Ride'}],
   favoriteBikes: [{type: Number}], //bike numbers
   resetPasswordToken: {type: String},
-  resetPasswordExpires: {type: Date}
+  resetPasswordExpires: {type: Date},
+  staff: {type: Boolean, default: false},
+  admin: {type: Boolean, default: false}
 });
 
 // Define methods ====================================================================================================================================================================
