@@ -16,11 +16,8 @@ var Ride = require('../models/ride');
 var User = require('../models/user');
 
 module.exports = function(passport) {
-	router.get('/signup', function(req ,res) {
-		res.statusCode = 204;
-		res.end();
-	})
 
+	//Regular User Signup
 	router.post('/signup', function(req, res) {
 		var url = 'https://bpi.briteverify.com/emails.json?address=' + req.body.email + '&amp;apikey=' + briteverify;
 		request({
@@ -29,35 +26,38 @@ module.exports = function(passport) {
 			}, function (error, response, body) {
 				if (!error && response.statusCode === 200) {
 					if(body.status=="valid") {
-						let newUser = new User({
-							email: req.body.email.toLowerCase(),
-							password: req.body.password,
-							firstName: req.body.firstName,
-							lastName: req.body.lastName,
-							//birthday: req.body.birthday,
-							//campus: mongoose.Types.ObjectId(req.body.campus)
-						});
-            newUser.save().then(async function(user) {
-							let options = {
-			    	    auth: {
-			    		    api_user: username,
-			            api_key: password
-			          }
-			        }
-			        let client = nodemailer.createTransport(sgTransport(options));
-			        let email = {
-			          from: 'support@bike.com',
-			          to: user.email,
-			          subject: 'Welcome to Bike!',
-			          text: 'Welcome!'
-			         };
-			        client.sendMail(email, function(err){
-								if(err) throw err;
-								res.json({success: true})
-			        });
-            }).catch(function(err) {
-               res.json({success: false, message: 'That email address already exists.'});
-       	    })
+						if(req.body.email.includes("@swarthmore.edu")) {
+							let newUser = new User({
+								email: req.body.email.toLowerCase(),
+								password: req.body.password,
+								firstName: req.body.firstName,
+								lastName: req.body.lastName,
+								campus: req.body.campus
+							});
+	            newUser.save().then(async function(user) {
+								let options = {
+				    	    auth: {
+				    		    api_user: username,
+				            api_key: password
+				          }
+				        }
+				        let client = nodemailer.createTransport(sgTransport(options));
+				        let email = {
+				          from: 'support@renecycle.com',
+				          to: user.email,
+				          subject: 'Welcome to Renecycle!',
+				          text: 'Welcome!'
+				         };
+				        client.sendMail(email, function(err){
+									if(err) throw err;
+									res.json({success: true})
+				        });
+	            }).catch(function(err) {
+	               res.json({success: false, message: 'That email address already exists.'});
+	       	    })
+						} else {
+							res.json({success: false, message: 'You must use a valid Swarthmore email.'});
+						}
 					} else {
 						res.json({success: false, message: 'Please enter a valid email address.'});
 					}
@@ -65,11 +65,7 @@ module.exports = function(passport) {
 		})
 	});
 
-	router.get('/login', function(req ,res) {
-		res.statusCode = 204;
-		res.end();
-  })
-
+	//Login
   router.post('/login', function(req, res) {
     User.findOne({
       email: req.body.email.toLowerCase()
@@ -90,12 +86,17 @@ module.exports = function(passport) {
     });
   });
 
-/*
-	router.get('/settings', function(req ,res) {
-		res.statusCode = 204;
-		res.end();
-  })
+	//Add Payment Information
 
+	//Delete
+	router.post('/delete', passport.authenticate('jwt', {session: false}), function(req, res) {
+		User.deleteOne({email: req.user.email}, function(err) {
+			if(err) throw err;
+			res.json({success: true});
+		})
+	})
+
+	//Forgot Password
   router.post('/forgot', function(req, res) {
     async.waterfall([
       function(done) {
@@ -105,7 +106,7 @@ module.exports = function(passport) {
         });
       },
       function(emailToken, done) {
-        User.findOne({ username: req.body.username }, function(err, user) {
+        User.findOne({email: req.body.email}, function(err, user) {
           if (!user) {
             res.send(401, {success: false, message: 'No account with that email address exists.'});
            return;
@@ -130,9 +131,9 @@ module.exports = function(passport) {
         let client = nodemailer.createTransport(sgTransport(options));
 
         let email = {
-          from: 'support@theuniversityloop.com',
-          to: user.username,
-          subject: ' Password Reset',
+          from: 'support@renecycle.com',
+          to: user.email,
+          subject: 'Password Reset',
           text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Paste the following token ' + emailToken + ' into the token field to set a new password.\n\n' +
             'If you did not request this, please ignore this email and your password will remain unchanged.\n'
@@ -147,7 +148,8 @@ module.exports = function(passport) {
     });
   })
 
-  router.put('/reset', function(req, res) {
+	//Reset Password
+  router.post('/reset', function(req, res) {
     async.waterfall([
       function(done) {
         User.findOne({ resetPasswordToken: req.body.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
@@ -176,11 +178,11 @@ module.exports = function(passport) {
         let client = nodemailer.createTransport(sgTransport(options));
 
         let email = {
-          from: 'support@theuniversityloop.com',
-          to: user.username,
+          from: 'support@renecycle.com',
+          to: user.email,
           subject: 'Successful Password Reset',
           text: 'Hello,\n\n' +
-          'This is a confirmation that the password for your account ' + user.username + ' has just been changed. Login with your new password\n'
+          'This is a confirmation that the password for your account ' + user.email + ' has just been changed. Login with your new password\n'
         };
         client.sendMail(email, function(err){
       	  done(err)
@@ -192,6 +194,20 @@ module.exports = function(passport) {
     });
   });
 
-*/
+	/*
+	//Change User Information
+	router.post('/editInfo', passport.authenticate('jwt', {session: false}), function(req, res) {
+	})
+
+	//Change Password
+	router.post('/changePassword', passport.authenticate('jwt', {session: false}), function(req, res) {
+
+	})
+
+	//Change Payment Information
+	router.post('/changePayment', passport.authenticate('jwt', {session: false}), function(req, res) {
+
+	})
+	*/
 	return router;
 }

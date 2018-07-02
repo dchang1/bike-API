@@ -13,8 +13,7 @@ var userSchema = new mongoose.Schema({
   favoriteBikes: [{type: Number}], //bike numbers
   resetPasswordToken: {type: String},
   resetPasswordExpires: {type: Date},
-  staff: {type: Boolean, default: false},
-  admin: {type: Boolean, default: false}
+  userType: {type: String, default: "user"}
 });
 
 // Define methods ====================================================================================================================================================================

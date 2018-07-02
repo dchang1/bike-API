@@ -7,14 +7,17 @@ var Ride = require('../models/ride');
 var Campus = require('../models/campus');
 
 module.exports = function(passport) {
+
+	//Get all user information
 	router.get('/user', passport.authenticate('jwt', { session: false }), function(req, res) {
 		User.findOne({email: req.user.email}, function(err, user) {
 			if(err) throw err;
 			res.json({"user": user});
 		})
 	})
-	
-	router.get('/rides', passport.authenticate('jwt', { session: false }), function(req, res) {
+
+	//Get all rides
+	router.get('/user/rides', passport.authenticate('jwt', { session: false }), function(req, res) {
 		User.findOne({email: req.user.email}, function(err, user) {
 			if(err) throw err;
 			Ride.find({_id: user.pastRides}, function(err, rides) {
@@ -23,7 +26,8 @@ module.exports = function(passport) {
 		})
 	})
 
-	router.get('/favoriteBikes', passport.authenticate('jwt', { session: false }), function(req, res) {
+	//Get favorite bikes
+	router.get('/user/favoriteBikes', passport.authenticate('jwt', { session: false }), function(req, res) {
 		User.findOne({email: req.user.email}, function(err, user) {
 			if(err) throw err;
 			Bike.find({number: user.favoriteBikes}, function(err, bikes) {
@@ -31,5 +35,16 @@ module.exports = function(passport) {
 			})
 		})
 	})
+
+	//Get campus Information
+	router.get('/user/campus', passport.authenticate('jwt', {session: false}), function(req, res) {
+		User.findOne({email: req.user.email}, function(err, user) {
+			if(err) throw err;
+			Campus.find({name: user.campus}, function(err, campus) {
+				res.json({"campus": campus});
+			})
+		})
+	})
+	
 	return router;
 }
