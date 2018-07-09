@@ -17,7 +17,7 @@ var bikeSchema = new mongoose.Schema({
   currentPosition: [{type: Number}],
   currentRide: {type: mongoose.Schema.Types.ObjectId, ref: 'Ride'},
   outsideFence: {type: Boolean, default: false},
-  lockID: {type: Number},
+  lockID: {type: String},
   online: {type: Boolean, default: false}
 });
 

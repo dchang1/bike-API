@@ -37,7 +37,7 @@ module.exports = function(passport) {
 			request.post({url: url, form: {"access_token": particle}}, function (error, response, body) {
 				if (!error && response.statusCode === 200) {
 					let newRide = new Ride({
-						startPosition: req.body.position.split(','),
+						startPosition: bike.currentPosition,
 						startTime: Date.now(),
 						user: req.user.email,
 						bike: req.body.bike,
@@ -58,22 +58,20 @@ module.exports = function(passport) {
 	})
 
 	//End Ride
-	router.post('/endRide/:id', passport.authenticate('jwt', {session: false}), function(req, res) {
-		Ride.findById(req.params.id, function(err, ride) {
+	router.post('/endRide', passport.authenticate('jwt', {session: false}), function(req, res) {
+		Ride.findById(req.body.ride, function(err, ride) {
 			if(err) throw err;
 			ride.endTime = Date.now();
 			ride.endPosition = req.body.position.split(',');
 			ride.distance = distance(ride.startPosition[0], ride.startPosition[1], ride.endPosition[0], ride.endPosition[1]);
 			ride.time = (ride.endTime - ride.startTime)/1000;
-			ride.rating = req.body.rating;
 			ride.inRide = false;
 			ride.route.push(req.body.position.split(','));
 			ride.save(function(err, savedRide) {
 				Bike.findOne({number: savedRide.bike}, function(err, bike) {
 					if(err) throw err;
-					bike.currentRide = "";
-					bike.rating = (bike.rating*bike.rides.length + req.body.rating)/(bike.rides.length+1);
-					bike.rides.push(ride._id);
+					bike.currentRide = null;
+					bike.rides.push(savedRide._id);
 					bike.totalHours += savedRide.time;
 					bike.totalDistance += savedRide.distance;
 					bike.save(function(err, savedBike) {
@@ -84,6 +82,29 @@ module.exports = function(passport) {
 								res.json({success: true});
 							})
 						})
+					})
+				})
+			})
+		})
+	})
+
+	//Add Rating
+	router.post('/rating', passport.authenticate('jwt', {session: false}), function(req, res) {
+		Ride.findOne({_id: req.body.ride}, function(err, ride) {
+			if(err) throw err;
+			ride.rating = req.body.rating;
+			ride.save(function(err, savedRide) {
+				if(err) throw err;
+				Bike.findOne({number: savedRide.bike}, function(err, bike) {
+					if(err) throw err;
+					if(bike.rides.length==1) {
+						bike.rating = req.body.rating;
+					} else {
+						bike.rating = (bike.rating*(bike.rides.length-1) + Number(req.body.rating))/(bike.rides.length);
+					}
+					bike.save(function(err, savedBike) {
+						if(err) throw err;
+						res.json({success: true});
 					})
 				})
 			})
@@ -107,16 +128,15 @@ module.exports = function(passport) {
 					if(err) throw err;
 					if(ride) {
 						ride.endTime = Date.now();
-						ride.endPosition = req.body.position.split(',');
+						ride.endPosition = bike.currentPosition;
 						ride.distance = distance(ride.startPosition[0], ride.startPosition[1], ride.endPosition[0], ride.endPosition[1]);
 						ride.time = (ride.endTime - ride.startTime)/1000;
-						ride.rating = req.body.rating;
 						ride.inRide = false;
-						ride.route.push(req.body.position.split(','));
+						ride.route.push(bike.currentPosition);
 						ride.save(function(err, savedRide) {
 							if(err) throw err;
-							bike.currentRide = "";
-							bike.rating.push(savedRide.rating);
+							bike.currentRide = null;
+							bike.rides.push(savedRide._id);
 							bike.totalHours += savedRide.time;
 							bike.totalDistance += savedRide.distance;
 							bike.save(function(err, savedBike) {
