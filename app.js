@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var morgan = require('morgan');
 var passport = require('passport');
 var path = require('path')
+var cors = require('cors');
 var port =  process.env.PORT || 3000;
 var routes = require('./routes/routes');
 var bike = require('./routes/bike');
@@ -39,6 +40,8 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
+
+app.use(cors({origin: '*'}));
 
 // development error handler
 // will print stacktrace

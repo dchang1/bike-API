@@ -47,7 +47,7 @@ module.exports = function(passport) {
 						bike.currentRide = ride._id;
 						bike.save(function(err, bike) {
 							if(err) throw err;
-							res.json({success: true})
+							res.json({success: true, "rideID": ride._id, "bike": bike.number})
 						})
 					}).catch(function(err) {
 						res.json({sucess: false, message: 'Bike did not unlock.'});

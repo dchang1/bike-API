@@ -77,7 +77,7 @@ module.exports = function(passport) {
         user.comparePassword(req.body.password, function(err, isMatch) {
           if (isMatch && !err) {
             let token = jwt.sign({data: user}, secret);
-            res.json({success: true, token: 'JWT ' + token });
+            res.json({success: true, token: 'JWT ' + token, firstName: user.firstName, lastName: user.lastName, email: user.email, campus: user.campus, userType: user.userType});
           } else {
             res.send(401, {success: false, message: 'Authentication failed. Incorrect password.'});
           }
