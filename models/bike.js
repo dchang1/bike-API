@@ -3,7 +3,8 @@ var mongoose = require('mongoose');
 var bikeSchema = new mongoose.Schema({
   createdAt: {type: Date, default: Date.now},
   number: {type: Number},
-  owner: {type: String},
+  ownerEmail: {type: String},
+  ownerName: {type: String},
   name: {type: String},
   color: {type: String},
   type: {type: String},

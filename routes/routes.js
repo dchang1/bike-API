@@ -79,7 +79,7 @@ module.exports = function(passport) {
             let token = jwt.sign({data: user}, secret);
             res.json({success: true, token: 'JWT ' + token, firstName: user.firstName, lastName: user.lastName, email: user.email, campus: user.campus, userType: user.userType});
           } else {
-            res.send(401, {success: false, message: 'Authentication failed. Incorrect password.'});
+            res.json({success: false, message: 'Authentication failed. Incorrect password.'});
           }
         });
       }

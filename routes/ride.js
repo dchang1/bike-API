@@ -147,6 +147,8 @@ module.exports = function(passport) {
 								if(err) throw err;
 								User.findOne({email: savedRide.user}, function(err, user) {
 									user.pastRides.push(savedRide._id);
+                  user.totalRideTime += savedRide.time;
+                  user.totalDistance += savedRide.distance;
 									user.save(function(err, savedUser) {
 										res.json({success: true});
 									})

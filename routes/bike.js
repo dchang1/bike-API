@@ -96,7 +96,8 @@ module.exports = function(passport) {
 				let newBike = new Bike({
 					number: number,
 					name: req.body.name,
-					owner: req.body.owner,
+					ownerName: req.body.ownerName || "",
+					ownerEmail: req.body.ownerEmail || "",
 					color: req.body.color,
 					type: req.body.type,
 					lockID: req.body.lockID,

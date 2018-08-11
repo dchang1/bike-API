@@ -10,6 +10,9 @@ var userSchema = new mongoose.Schema({
   paymentToken: {type: String},
   campus: {type: String}, //campus name
   pastRides: [{type: mongoose.Schema.Types.ObjectId, ref: 'Ride'}],
+  totalRideTime: {type: Number, default: 0},
+  totalDistance: {type: Number, default: 0},
+  bikeScore: {type: Number, default: 0},
   favoriteBikes: [{type: Number}], //bike numbers
   resetPasswordToken: {type: String},
   resetPasswordExpires: {type: Date},
