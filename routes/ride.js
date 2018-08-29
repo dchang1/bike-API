@@ -68,9 +68,10 @@ module.exports = function(passport) {
 			ride.endTime = Date.now();
 			ride.endPosition = req.body.position.split(',');
 			ride.distance = distance(ride.startPosition[0], ride.startPosition[1], ride.endPosition[0], ride.endPosition[1]);
-			ride.time = (ride.endTime - ride.startTime)/1000;
+			ride.time = (ride.endTime - ride.startTime)/3600000;
 			ride.inRide = false;
 			ride.route.push(req.body.position.split(','));
+      ride.calories = req.body.calories;
 			ride.save(function(err, savedRide) {
 				Bike.findOne({number: savedRide.bike}, function(err, bike) {
 					if(err) throw err;
@@ -82,6 +83,8 @@ module.exports = function(passport) {
 						if(err) throw err;
 						User.findOne({email: savedRide.user}, function(err, user) {
 							user.pastRides.push(savedRide._id);
+              user.totalRideTime += savedRide.time;
+              user.totalDistance += savedRide.distance;
 							user.save(function(err, savedUser) {
 								res.json({success: true});
 							})
@@ -134,7 +137,7 @@ module.exports = function(passport) {
 						ride.endTime = Date.now();
 						ride.endPosition = bike.currentPosition;
 						ride.distance = distance(ride.startPosition[0], ride.startPosition[1], ride.endPosition[0], ride.endPosition[1]);
-						ride.time = (ride.endTime - ride.startTime)/1000;
+						ride.time = (ride.endTime - ride.startTime)/3600000;
 						ride.inRide = false;
 						ride.route.push(bike.currentPosition);
 						ride.save(function(err, savedRide) {

@@ -9,10 +9,11 @@ var rideSchema = new mongoose.Schema({
   user: {type: String}, //email
   bike: {type: Number}, //bike number
   outsideFence: {type: Boolean, default: false},
-  time: {type: Number},
-  distance: {type: Number},
+  time: {type: Number}, //hours
+  distance: {type: Number}, //km
   campus: {type: String},
   rating: {type: Number},
+  calories: {type: Number},
   inRide: {type: Boolean, default: true}
 });
 

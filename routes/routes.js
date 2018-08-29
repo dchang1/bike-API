@@ -108,7 +108,7 @@ module.exports = function(passport) {
       function(emailToken, done) {
         User.findOne({email: req.body.email}, function(err, user) {
           if (!user) {
-            res.send(401, {success: false, message: 'No account with that email address exists.'});
+            res.json({success: false, message: 'No account with that email address exists.'});
            return;
           }
           let jwtoken = jwt.sign({data: user}, secret);
@@ -144,7 +144,7 @@ module.exports = function(passport) {
       }
     ], function(err, jwtoken) {
       if (err) throw err;
-      res.send({success: true, token: 'JWT ' + jwtoken})
+      res.json({success: true, token: 'JWT ' + jwtoken})
     });
   })
 
@@ -154,9 +154,9 @@ module.exports = function(passport) {
       function(done) {
         User.findOne({ resetPasswordToken: req.body.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
           if (!user) {
-            res.json(401, {success: false, message: 'Password reset token is invalid or has expired.'});
+            res.json({success: false, message: 'Password reset token is invalid or has expired.'});
           } else if (req.body.newPassword !== req.body.confirmNewPassword) {
-          	res.json(401, {success: false, message: "Passwords don't match."})
+          	res.json({success: false, message: "Passwords don't match."})
           } else {
             user.password = req.body.newPassword;
             user.resetPasswordToken = undefined;
@@ -190,24 +190,74 @@ module.exports = function(passport) {
       }
     ], function(err) {
       if (err) throw err;
-      res.send({success: true});
+      res.json({success: true});
     });
   });
 
-	/*
+
 	//Change User Information
-	router.post('/editInfo', passport.authenticate('jwt', {session: false}), function(req, res) {
+	router.post('/updateFirstName', passport.authenticate('jwt', {session: false}), function(req, res) {
+		User.findOne({email: req.user.email}, function(err, user) {
+			user.firstName = req.body.firstName;
+			user.save(function(err, savedUser) {
+				if(err) throw err;
+				res.json({success: true});
+			})
+		})
 	})
 
-	//Change Password
-	router.post('/changePassword', passport.authenticate('jwt', {session: false}), function(req, res) {
-
+	router.post('/updateLastName', passport.authenticate('jwt', {session: false}), function(req, res) {
+		User.findOne({email: req.user.email}, function(err, user) {
+			user.lastName = req.body.lastName;
+			user.save(function(err, savedUser) {
+				if(err) throw err;
+				res.json({success: true});
+			})
+		})
 	})
 
-	//Change Payment Information
-	router.post('/changePayment', passport.authenticate('jwt', {session: false}), function(req, res) {
-
+	router.post('/updateEmail', passport.authenticate('jwt', {session: false}), function(req, res) {
+		User.findOne({email: req.body.email}, function(err, foundUser) {
+			if(foundUser) {
+				res.json({success: false, message: "User already exists with that email."});
+			} else {
+				User.findOne({email: req.user.email}, function(err, user) {
+					user.email = req.body.email;
+					user.save(function(err, savedUser) {
+						if(err) throw err;
+						res.json({success: true});
+					})
+				})
+			}
+		})
 	})
-	*/
+
+	router.post('/verify', passport.authenticate('jwt', {session: false}), function(req, res) {
+		User.findOne({email: req.user.email}, function(err, user) {
+      user.comparePassword(req.body.password, function(err, isMatch) {
+        if (isMatch && !err) {
+          res.json({success: true});
+        } else {
+          res.json({success: false, message: 'Authentication failed. Incorrect password.'});
+        }
+      });
+    });
+	})
+
+	router.post('/updatePassword', passport.authenticate('jwt', {session: false}), function(req, res) {
+		User.findOne({email: req.user.email}, function(err, user) {
+      if (err) throw err;
+			if(req.body.newPassword !== req.body.confirmNewPassword) {
+				res.json({success: false, message: "Passwords do not match."})
+			} else {
+				user.password = req.body.newPassword;
+				user.save(function(err, savedUser) {
+					if(err) throw err;
+					res.json({success: true});
+				})
+			}
+    });
+	})
+
 	return router;
 }

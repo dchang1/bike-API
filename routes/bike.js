@@ -22,7 +22,7 @@ module.exports = function(passport) {
 
 	//Get all Bikes in Campus
 	router.get('/allCampusBikes', passport.authenticate('jwt', {session: false}), function(req, res) {
-		Bike.find({campus: req.user.campus}, function(err, bikes) {
+		Bike.find({campus: req.user.campus, currentRIde: null}, function(err, bikes) {
 			if(err) throw err;
 			res.json({"bikes": bikes});
 		})
