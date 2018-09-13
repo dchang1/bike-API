@@ -13,10 +13,14 @@ module.exports = function(passport) {
 	//Get Bike Information
 	router.get('/bike/:id', passport.authenticate('jwt', {session: false}), function(req, res) {
 		Bike.findOne({number: req.params.id}, function(err, bike) {
-			Campus.findOne({name: bike.campus}, function(err, campus) {
-				if(err) throw err;
-				res.json({"bike": bike, "geofence": campus.geofence});
-			})
+			if(bike) {
+				Campus.findOne({name: bike.campus}, function(err, campus) {
+					if(err) throw err;
+					res.json({success: true, "bike": bike, "geofence": campus.geofence});
+				})
+			} else {
+				res.json({success: false, message: "Bike does not exist."})
+			}
 		})
 	})
 
@@ -85,16 +89,8 @@ module.exports = function(passport) {
 	//New Bike
 	router.post('/bike', function(req, res) {
 		if(req.body.password==password) {
-			Bike.find({}, function(err, bikes) {
-				let bikeNumbers = bikes.map(function(bike) {
-					return bike.number;
-				})
-				let number = Math.random().toString().slice(2, 8);
-				while(bikeNumbers.indexOf(number)!=-1) {
-					number = Math.random().toString().slice(2, 8);
-				}
 				let newBike = new Bike({
-					number: number,
+					number: req.body.number,
 					name: req.body.name,
 					ownerName: req.body.ownerName || "",
 					ownerEmail: req.body.ownerEmail || "",
@@ -104,15 +100,12 @@ module.exports = function(passport) {
 					campus: req.body.campus
 				})
 				newBike.save().then(async function(bike) {
-					Campus.findOne({name: req.body.campus}, function(err, campus) {
-						campus.bikeList.push(bike.number);
-						campus.save(function(err, savedCampus) {
-							if(err) throw err;
-							res.json({success: true});
-						})
+					console.log("saved");
+					Campus.findOneAndUpdate({name: req.body.campus}, {$push: {bikeList: bike.number}}, function(err, campus) {
+						if(err) throw err;
+						res.json({success: true});
 					})
 				})
-			})
 		} else {
 			res.json({success: false, message: 'You do not have permission.'})
 		}
@@ -158,6 +151,15 @@ module.exports = function(passport) {
 			})
 		} else {
 			res.json({success: false});
+		}
+	})
+
+	router.post('/batteryEvent', function(req, res) {
+		if(req.body.password==webhook) {
+			Bike.findOneAndUpdate({lockID: req.body.coreid}, {$set: {batteryLife: req.body.data}}, function(err) {
+				if(err) throw err;
+				res.json({success: true});
+			})
 		}
 	})
 

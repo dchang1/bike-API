@@ -15,7 +15,7 @@ var bikeSchema = new mongoose.Schema({
   totalDistance: {type: Number, default: 0},
   rating: {type: Number},
   campus: {type: String}, //campus name
-  currentPosition: [{type: Number}],
+  currentPosition: {type: [Number], default: [39.905022, -75.354034], required: true},
   currentRide: {type: mongoose.Schema.Types.ObjectId, ref: 'Ride'},
   outsideFence: {type: Boolean, default: false},
   lockID: {type: String},

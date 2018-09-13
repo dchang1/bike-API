@@ -134,25 +134,36 @@ module.exports = function(passport) {
 				Ride.findById(bike.currentRide, function(err, ride) {
 					if(err) throw err;
 					if(ride) {
+            console.log("found ride");
 						ride.endTime = Date.now();
+            console.log("here");
 						ride.endPosition = bike.currentPosition;
+            console.log("here");
 						ride.distance = distance(ride.startPosition[0], ride.startPosition[1], ride.endPosition[0], ride.endPosition[1]);
-						ride.time = (ride.endTime - ride.startTime)/3600000;
-						ride.inRide = false;
-						ride.route.push(bike.currentPosition);
+            console.log("here");
+            ride.time = (ride.endTime - ride.startTime)/3600000;
+            console.log("here");
+            ride.inRide = false;
+            console.log("here");
+            ride.route = ride.route.concat([bike.currentPosition]);
+            console.log("changed ride");
+            console.log(ride);
 						ride.save(function(err, savedRide) {
 							if(err) throw err;
+              console.log("saved Ride");
 							bike.currentRide = null;
-							bike.rides.push(savedRide._id);
+							bike.rides = bike.rides.concat([savedRide._id]);
 							bike.totalHours += savedRide.time;
 							bike.totalDistance += savedRide.distance;
 							bike.save(function(err, savedBike) {
 								if(err) throw err;
+                console.log("saved bike");
 								User.findOne({email: savedRide.user}, function(err, user) {
-									user.pastRides.push(savedRide._id);
+									user.pastRides = user.pastRides.concat([savedRide._id]);
                   user.totalRideTime += savedRide.time;
                   user.totalDistance += savedRide.distance;
 									user.save(function(err, savedUser) {
+                    console.log("Saved user");
 										res.json({success: true});
 									})
 								})

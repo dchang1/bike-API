@@ -43,9 +43,9 @@ module.exports = function(passport) {
 				        }
 				        let client = nodemailer.createTransport(sgTransport(options));
 				        let email = {
-				          from: 'support@renecycle.com',
+				          from: 'support@taiga.bike',
 				          to: user.email,
-				          subject: 'Welcome to Renecycle!',
+				          subject: 'Welcome to Taiga!',
 				          text: 'Welcome!'
 				         };
 				        client.sendMail(email, function(err){
@@ -131,7 +131,7 @@ module.exports = function(passport) {
         let client = nodemailer.createTransport(sgTransport(options));
 
         let email = {
-          from: 'support@renecycle.com',
+          from: 'support@taiga.bike',
           to: user.email,
           subject: 'Password Reset',
           text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
@@ -178,7 +178,7 @@ module.exports = function(passport) {
         let client = nodemailer.createTransport(sgTransport(options));
 
         let email = {
-          from: 'support@renecycle.com',
+          from: 'support@taiga.bike',
           to: user.email,
           subject: 'Successful Password Reset',
           text: 'Hello,\n\n' +
