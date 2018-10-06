@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var jwt = require('jsonwebtoken');
-var crypto = require('crypto');
+var crypto = require('crypto'),
+    algorithm = 'aes192',
+    pass = 'd6F3Efeq';
 var async = require('async');
 var nodemailer = require('nodemailer');
 var sgTransport = require('nodemailer-sendgrid-transport');
@@ -14,6 +16,20 @@ var Bike = require('../models/bike');
 var Campus = require('../models/campus');
 var Ride = require('../models/ride');
 var User = require('../models/user');
+
+function encrypt(text){
+  var cipher = crypto.createCipher(algorithm,pass)
+  var crypted = cipher.update(text,'utf8','hex')
+  crypted += cipher.final('hex');
+  return crypted;
+}
+
+function decrypt(text){
+  var decipher = crypto.createDecipher(algorithm,pass)
+  var dec = decipher.update(text,'hex','utf8')
+  dec += decipher.final('utf8');
+  return dec;
+}
 
 module.exports = function(passport) {
 
@@ -34,6 +50,7 @@ module.exports = function(passport) {
 								lastName: req.body.lastName,
 								campus: req.body.campus
 							});
+							var token = encrypt(req.body.email.toLowerCase());
 	            newUser.save().then(async function(user) {
 								let options = {
 				    	    auth: {
@@ -46,7 +63,8 @@ module.exports = function(passport) {
 				          from: 'support@taiga.bike',
 				          to: user.email,
 				          subject: 'Welcome to Taiga!',
-				          text: 'Welcome!'
+									text: 'Welcome!'
+				          //text: 'Welcome! taiga://verify/' + token
 				         };
 				        client.sendMail(email, function(err){
 									if(err) throw err;
@@ -65,6 +83,49 @@ module.exports = function(passport) {
 		})
 	});
 
+	router.get('/resend', passport.authenticate('jwt', {session: false}), function(req, res) {
+		if(req.user) {
+			let options = {
+				auth: {
+					api_user: username,
+					api_key: password
+				}
+			}
+			let client = nodemailer.createTransport(sgTransport(options));
+			let email = {
+				from: 'support@taiga.bike',
+				to: req.user.email,
+				subject: 'Welcome to Taiga!',
+				text: 'Welcome! taiga://verify/' + encrypt(req.user.email.toLowerCase())
+			 };
+			client.sendMail(email, function(err){
+				if(err) throw err;
+				res.json({success: true})
+			});
+		} else {
+			res.json({success: false})
+		}
+	})
+
+	router.get('/verify/:token', passport.authenticate('jwt', {session: false}), function(req, res) {
+    if(req.user) {
+      var token = decrypt(req.params.token);
+      if(token == req.user.username) {
+        User.findOne({username: req.user.username}, function(err, user) {
+          user.verified = true;
+          user.save(function(err, savedUser) {
+            if(err) throw err;
+            res.json({success: true});
+          });
+        })
+      } else {
+        res.json({success: false});
+      }
+    } else {
+			res.json({success: false});
+    }
+  })
+
 	//Login
   router.post('/login', function(req, res) {
     User.findOne({
@@ -77,7 +138,7 @@ module.exports = function(passport) {
         user.comparePassword(req.body.password, function(err, isMatch) {
           if (isMatch && !err) {
             let token = jwt.sign({data: user}, secret);
-            res.json({success: true, token: 'JWT ' + token, firstName: user.firstName, lastName: user.lastName, email: user.email, campus: user.campus, userType: user.userType});
+            res.json({success: true, token: 'JWT ' + token, firstName: user.firstName, lastName: user.lastName, email: user.email, campus: user.campus, userType: user.userType, verified: user.verified, totalDistance: user.totalDistance, totalRideTime: user.totalRideTime, totalRides: user.pastRides.length});
           } else {
             res.json({success: false, message: 'Authentication failed. Incorrect password.'});
           }

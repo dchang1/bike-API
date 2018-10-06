@@ -14,7 +14,9 @@ var rideSchema = new mongoose.Schema({
   campus: {type: String},
   rating: {type: Number},
   calories: {type: Number},
-  inRide: {type: Boolean, default: true}
+  inRide: {type: Boolean, default: true},
+  startHub: {type: String},
+  endHub: {type: String}
 });
 
 // Export schema =====================================================================================================================================================================

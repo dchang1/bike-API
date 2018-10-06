@@ -13,6 +13,7 @@ var bike = require('./routes/bike');
 var campus = require('./routes/campus');
 var ride = require('./routes/ride');
 var user = require('./routes/user');
+var hub = require('./routes/hub');
 
 //Express configuration ==============================================================================================================================================================
 app.use(express.static(path.join(__dirname, 'public')));
@@ -33,6 +34,7 @@ app.use(bike(passport));
 app.use(campus(passport));
 app.use(ride(passport));
 app.use(user(passport));
+app.use(hub(passport));
 
 //Error handling =====================================================================================================================================================================
 app.use(function(req, res, next) {
@@ -64,7 +66,6 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 //====================================================================================================================================================================================
 app.listen(port, function(){

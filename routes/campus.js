@@ -5,6 +5,7 @@ var Bike = require('../models/bike');
 var Campus = require('../models/campus');
 var Ride = require('../models/ride');
 var User = require('../models/user');
+var Hub = require('../models/hub');
 var password = process.env.new_campus;
 
 module.exports = function(passport) {
@@ -38,11 +39,18 @@ module.exports = function(passport) {
 		}
 	})
 
-	//Get Campus Information
+	//Get geofence Information
 	router.get('/campus/:name', passport.authenticate('jwt', {session: false}), function(req, res) {
 		Campus.findOne({name: req.params.name}, function(err, campus) {
 			if(err) throw err;
-			res.json({"campus": campus});
+			let geofence = campus.geofence.map(function(latlng) {
+				var obj = {};
+				obj["lat"] = latlng[0];
+				obj["lng"] = latlng[1];
+				return obj;
+			})
+			console.log(geofence);
+			res.json({"geofence": geofence});
 		})
 	})
 
@@ -80,6 +88,6 @@ module.exports = function(passport) {
 			res.json({"bikes": bikes});
 		})
 	})
-	
+
 	return router;
 }

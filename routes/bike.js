@@ -5,6 +5,7 @@ var Bike = require('../models/bike');
 var Campus = require('../models/campus');
 var Ride = require('../models/ride');
 var User = require('../models/user');
+var Hub = require('../models/hub');
 var password = process.env.new_bike;
 var webhook = process.env.webhook;
 
@@ -97,7 +98,8 @@ module.exports = function(passport) {
 					color: req.body.color,
 					type: req.body.type,
 					lockID: req.body.lockID,
-					campus: req.body.campus
+					campus: req.body.campus,
+					size: req.body.size
 				})
 				newBike.save().then(async function(bike) {
 					console.log("saved");
@@ -161,6 +163,23 @@ module.exports = function(passport) {
 				res.json({success: true});
 			})
 		}
+	})
+
+	router.post('/bleMACEvent', function(req, res) {
+		console.log(req.body);
+		if(req.body.password==webhook) {
+			Bike.findOneAndUpdate({lockID: req.body.coreid}, {$set: {bleMAC: req.body.data}}, function(err) {
+				if(err) throw err;
+				res.json({success: true});
+			})
+		}
+	})
+
+	router.get('/bleMAC/:id', passport.authenticate('jwt', {session: false}), function(req, res) {
+		Bike.findOne({number: req.params.id}, function(err, bike) {
+			if(err) throw err;
+			res.json({success: true, bleMAC: bike.bleMAC});
+		})
 	})
 
 	return router;

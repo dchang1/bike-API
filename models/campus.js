@@ -6,6 +6,7 @@ var campusSchema = new mongoose.Schema({
   bikeList: [{type: Number}], //bike numbers
   totalHours: {type: Number, default: 0},
   totalDistance: {type: Number, default: 0},
+  hubs: [{type: mongoose.Schema.Types.ObjectId, ref: 'Hub'}]
 });
 
 // Export schema =====================================================================================================================================================================

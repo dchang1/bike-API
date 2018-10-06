@@ -10,13 +10,16 @@ var userSchema = new mongoose.Schema({
   paymentToken: {type: String},
   campus: {type: String}, //campus name
   pastRides: [{type: mongoose.Schema.Types.ObjectId, ref: 'Ride'}],
+  myBikes: [{type: Number}],
   totalRideTime: {type: Number, default: 0},
   totalDistance: {type: Number, default: 0},
-  bikeScore: {type: Number, default: 0},
+  userScore: {type: Number, default: 0},
   favoriteBikes: [{type: Number}], //bike numbers
+  userType: {type: String, default: "user"},
+  verified: {type: Boolean, default: false},
+  birthday: {type: Date},
   resetPasswordToken: {type: String},
-  resetPasswordExpires: {type: Date},
-  userType: {type: String, default: "user"}
+  resetPasswordExpires: {type: Date}
 });
 
 // Define methods ====================================================================================================================================================================
