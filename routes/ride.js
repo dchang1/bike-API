@@ -96,6 +96,24 @@ module.exports = function(passport) {
 		Bike.findOne({number: req.body.bike}, function(err, bike) {
 			if(err) throw err;
       if(bike) {
+        let newRide = new Ride({
+          startPosition: bike.currentPosition,
+          startTime: Date.now(),
+          user: req.user.email,
+          bike: req.body.bike,
+          campus: bike.campus,
+          startHub: bike.hub
+        })
+        newRide.save().then(async function(ride) {
+          bike.currentRide = ride._id;
+          bike.save(function(err, bike) {
+            if(err) throw err;
+            res.json({success: true, "rideID": ride._id, "bike": bike.number})
+          })
+        }).catch(function(err) {
+          res.json({sucess: false, message: 'Bike did not unlock.'});
+        })
+        /*
         var url = "https://api.particle.io/v1/devices/" + bike.lockID + "/X";
   			request.post({url: url, form: {"access_token": particle}}, function (error, response, body) {
   				if (!error && response.statusCode === 200) {
@@ -119,7 +137,7 @@ module.exports = function(passport) {
   				} else {
             res.json({success: false, message: 'Bike offline.'});
           }
-  			})
+  			})*/
       } else {
         res.json({success: false, message: 'Bike does not exist.'});
       }
