@@ -17,6 +17,7 @@ var userSchema = new mongoose.Schema({
   favoriteBikes: [{type: Number}], //bike numbers
   userType: {type: String, default: "user"},
   verified: {type: Boolean, default: false},
+  verifyPIN: {type: Number},
   birthday: {type: Date},
   resetPasswordToken: {type: String},
   resetPasswordExpires: {type: Date}

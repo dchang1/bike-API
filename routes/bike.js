@@ -27,7 +27,7 @@ module.exports = function(passport) {
 
 	//Get all Bikes in Campus
 	router.get('/allCampusBikes', passport.authenticate('jwt', {session: false}), function(req, res) {
-		Bike.find({campus: req.user.campus, currentRIde: null}, function(err, bikes) {
+		Bike.find({campus: req.user.campus, currentRide: null, online: true, batteryLife: {$gt: 5}}, function(err, bikes) {
 			if(err) throw err;
 			res.json({"bikes": bikes});
 		})
@@ -160,6 +160,7 @@ module.exports = function(passport) {
 		if(req.body.password==webhook) {
 			Bike.findOneAndUpdate({lockID: req.body.coreid}, {$set: {batteryLife: req.body.data}}, function(err) {
 				if(err) throw err;
+				//if below 3, send email
 				res.json({success: true});
 			})
 		}

@@ -20,7 +20,7 @@ var bikeSchema = new mongoose.Schema({
   currentRide: {type: mongoose.Schema.Types.ObjectId, ref: 'Ride'},
   outsideFence: {type: Boolean, default: false},
   lockID: {type: String},
-  online: {type: Boolean, default: false},
+  online: {type: Boolean, default: true},
   hub: {type: String, default: ""},
   bleMAC: {type: String}
 });

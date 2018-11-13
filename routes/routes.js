@@ -48,7 +48,8 @@ module.exports = function(passport) {
 								password: req.body.password,
 								firstName: req.body.firstName,
 								lastName: req.body.lastName,
-								campus: req.body.campus
+								campus: req.body.campus,
+                verifyPIN: Math.floor(Math.random()*9000) + 1000
 							});
 							var token = encrypt(req.body.email.toLowerCase());
 	            newUser.save().then(async function(user) {
@@ -60,15 +61,16 @@ module.exports = function(passport) {
 				        }
 				        let client = nodemailer.createTransport(sgTransport(options));
 				        let email = {
-				          from: 'support@taiga.bike',
+				          from: 'support@hive.bike',
 				          to: user.email,
 				          subject: 'Welcome to Taiga!',
-									text: 'Welcome!'
+									text: 'Welcome!\n' + user.verifyPIN
 				          //text: 'Welcome! taiga://verify/' + token
 				         };
 				        client.sendMail(email, function(err){
 									if(err) throw err;
-									res.json({success: true})
+                  let token = jwt.sign({data: user}, secret);
+                  res.json({success: true, token: 'JWT ' + token, verified: user.verified, firstName: user.firstName, lastName: user.lastName, email: user.email, campus: user.campus, userType: user.userType, verified: user.verified, totalDistance: user.totalDistance, totalRideTime: user.totalRideTime, totalRides: user.pastRides.length});
 				        });
 	            }).catch(function(err) {
 	               res.json({success: false, message: 'That email address already exists.'});
@@ -93,10 +95,10 @@ module.exports = function(passport) {
 			}
 			let client = nodemailer.createTransport(sgTransport(options));
 			let email = {
-				from: 'support@taiga.bike',
+				from: 'support@hive.bike',
 				to: req.user.email,
 				subject: 'Welcome to Taiga!',
-				text: 'Welcome! taiga://verify/' + encrypt(req.user.email.toLowerCase())
+				text: 'Welcome!\n' + req.user.verifyPIN
 			 };
 			client.sendMail(email, function(err){
 				if(err) throw err;
@@ -107,16 +109,12 @@ module.exports = function(passport) {
 		}
 	})
 
-	router.get('/verify/:token', passport.authenticate('jwt', {session: false}), function(req, res) {
+	router.post('/verify', passport.authenticate('jwt', {session: false}), function(req, res) {
     if(req.user) {
-      var token = decrypt(req.params.token);
-      if(token == req.user.username) {
-        User.findOne({username: req.user.username}, function(err, user) {
-          user.verified = true;
-          user.save(function(err, savedUser) {
-            if(err) throw err;
-            res.json({success: true});
-          });
+      if(req.body.verifyPIN == req.user.verifyPIN) {
+        User.findOneAndUpdate({email: req.user.email}, {$set: {"verified": true}}, function(err, user) {
+          if(err) throw err;
+          res.json({success: true});
         })
       } else {
         res.json({success: false});
@@ -138,7 +136,7 @@ module.exports = function(passport) {
         user.comparePassword(req.body.password, function(err, isMatch) {
           if (isMatch && !err) {
             let token = jwt.sign({data: user}, secret);
-            res.json({success: true, token: 'JWT ' + token, firstName: user.firstName, lastName: user.lastName, email: user.email, campus: user.campus, userType: user.userType, verified: user.verified, totalDistance: user.totalDistance, totalRideTime: user.totalRideTime, totalRides: user.pastRides.length});
+            res.json({success: true, token: 'JWT ' + token, verified: user.verified, firstName: user.firstName, lastName: user.lastName, email: user.email, campus: user.campus, userType: user.userType, verified: user.verified, totalDistance: user.totalDistance, totalRideTime: user.totalRideTime, totalRides: user.pastRides.length});
           } else {
             res.json({success: false, message: 'Authentication failed. Incorrect password.'});
           }
@@ -192,7 +190,7 @@ module.exports = function(passport) {
         let client = nodemailer.createTransport(sgTransport(options));
 
         let email = {
-          from: 'support@taiga.bike',
+          from: 'support@hive.bike',
           to: user.email,
           subject: 'Password Reset',
           text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
@@ -239,7 +237,7 @@ module.exports = function(passport) {
         let client = nodemailer.createTransport(sgTransport(options));
 
         let email = {
-          from: 'support@taiga.bike',
+          from: 'support@hive.bike',
           to: user.email,
           subject: 'Successful Password Reset',
           text: 'Hello,\n\n' +
@@ -293,7 +291,7 @@ module.exports = function(passport) {
 		})
 	})
 
-	router.post('/verify', passport.authenticate('jwt', {session: false}), function(req, res) {
+	router.post('/verifyPassword', passport.authenticate('jwt', {session: false}), function(req, res) {
 		User.findOne({email: req.user.email}, function(err, user) {
       user.comparePassword(req.body.password, function(err, isMatch) {
         if (isMatch && !err) {

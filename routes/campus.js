@@ -14,7 +14,9 @@ module.exports = function(passport) {
 	router.post('/campus', function(req, res) {
 		if(req.body.password==password) {
 			let newCampus = new Campus({
-				name: req.body.name
+				name: req.body.name,
+				geofence: req.body.geofence,
+				center: req.body.center
 				//geofence
 			})
 			newCampus.save().then(async function(campus) {
@@ -49,8 +51,7 @@ module.exports = function(passport) {
 				obj["lng"] = latlng[1];
 				return obj;
 			})
-			console.log(geofence);
-			res.json({"geofence": geofence});
+			res.json({"geofence": geofence, "centerLat": campus.center[0], "centerLng": campus.center[1]});
 		})
 	})
 

@@ -14,6 +14,7 @@ var campus = require('./routes/campus');
 var ride = require('./routes/ride');
 var user = require('./routes/user');
 var hub = require('./routes/hub');
+var report = require('./routes/report');
 
 //Express configuration ==============================================================================================================================================================
 app.use(express.static(path.join(__dirname, 'public')));
@@ -35,6 +36,7 @@ app.use(campus(passport));
 app.use(ride(passport));
 app.use(user(passport));
 app.use(hub(passport));
+app.use(report(passport));
 
 //Error handling =====================================================================================================================================================================
 app.use(function(req, res, next) {
@@ -50,10 +52,7 @@ app.use(cors({origin: '*'}));
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
+    res.send('error');
   });
 }
 
@@ -61,10 +60,7 @@ if (app.get('env') === 'development') {
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
+  res.send('error');
 });
 
 //====================================================================================================================================================================================

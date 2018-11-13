@@ -13,10 +13,11 @@ var rideSchema = new mongoose.Schema({
   distance: {type: Number}, //km
   campus: {type: String},
   rating: {type: Number},
-  calories: {type: Number},
   inRide: {type: Boolean, default: true},
   startHub: {type: String},
-  endHub: {type: String}
+  endHub: {type: String},
+  comment: {type: String},
+  cost: {type: Number}
 });
 
 // Export schema =====================================================================================================================================================================

@@ -12,15 +12,15 @@ module.exports = function(passport) {
 	router.get('/user', passport.authenticate('jwt', { session: false }), function(req, res) {
 		User.findOne({email: req.user.email}, function(err, user) {
 			if(err) throw err;
-			res.json({"user": user});
+			res.json({verified: user.verified, firstName: user.firstName, lastName: user.lastName, email: user.email, campus: user.campus, userType: user.userType, verified: user.verified, totalDistance: user.totalDistance, totalRideTime: user.totalRideTime, totalRides: user.pastRides.length});
 		})
 	})
 
 	//Get all rides
-	router.get('/user/rides', passport.authenticate('jwt', { session: false }), function(req, res) {
+	router.get('/user/rides/:page', passport.authenticate('jwt', { session: false }), function(req, res) {
 		User.findOne({email: req.user.email}, function(err, user) {
 			if(err) throw err;
-			Ride.find({_id: user.pastRides}, function(err, rides) {
+			Ride.find({_id: user.pastRides}).limit(5).skip(5*req.params.page).exec(function(err, rides) {
 				res.json({"rides": rides});
 			})
 		})
