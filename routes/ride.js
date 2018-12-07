@@ -68,12 +68,14 @@ module.exports = function(passport) {
       if(bike) {
         let newRide = new Ride({
           startPosition: bike.currentPosition,
+          route: [bike.currentPosition],
           startTime: Date.now(),
           user: req.user.email,
           bike: req.body.bike,
           campus: bike.campus,
           startHub: bike.hub
         })
+        console.log(newRide);
         newRide.save().then(async function(ride) {
           bike.currentRide = ride._id;
           bike.save(function(err, bike) {
@@ -173,7 +175,7 @@ module.exports = function(passport) {
 					if(err) throw err;
           if(req.body.rating > 0) {
             if(bike.rating) {
-              bike.rating = (bike.rating*(bike.rides.length-1) + Number(req.body.rating))/(bike.rides.length);
+              bike.rating = Math.round(((bike.rating*(bike.rides.length-1) + Number(req.body.rating))/(bike.rides.length)) * 100) / 100;
             } else {
               bike.rating = req.body.rating;
             }

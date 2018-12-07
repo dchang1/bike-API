@@ -47,7 +47,7 @@ module.exports = function(passport) {
 
           let email = {
             from: req.user.email,
-            to: 'dchang2@swarthmore.edu',
+            to: 'support@hive.bike',
             subject: 'New Report',
             text: JSON.stringify(savedReport)
           };

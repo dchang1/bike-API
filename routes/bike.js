@@ -51,7 +51,7 @@ module.exports = function(passport) {
 					bike.numFavorites++;
 					bike.save(function(err, savedBike) {
 						if(err) throw err;
-						user.favoriteBikes.push(req.body.bike);
+						user.favoriteBikes = user.favoriteBikes.concat([req.body.bike]);
 						user.save(function(err, savedUser) {
 							if(err) throw err;
 							res.json({success: true});
@@ -138,7 +138,7 @@ module.exports = function(passport) {
 					Ride.findById(bike.currentRide, function(err, ride) {
 						if(err) throw err;
 						if(ride) {
-							ride.route.push(req.body.data.split(','));
+							ride.route = ride.route.concat([req.body.data.split(',')]);
 							ride.save(function(err, savedRide) {
 								if(err) throw err;
 								res.json({success: true});
